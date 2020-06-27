@@ -54,7 +54,7 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
         boolean hasDepthInGui = bakedModel.hasDepth();
 
         // decide how many item layers to render
-        int renderCount = this.getRenderedAmount(itemStack);
+        int renderCount = itemStack.getCount(); //this.getRenderedAmount(itemStack);
 
         // make item lie flat on ground
         matrixStack.multiply(Vector3f.POSITIVE_X.getRadialQuaternion(1.571F));
@@ -87,14 +87,18 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
         if (!hasDepthInGui) {
             float r = -0.0F * (float)(renderCount) * 0.5F * scaleX;
             x = -0.0F * (float)(renderCount) * 0.5F * scaleY;
-            y = -0.09375F * (float)(renderCount) * 0.5F * scaleZ;
+            y = -0.09375F / 2 * (float)(renderCount) * 0.5F * scaleZ - (0.0625F * 1.5f);
             matrixStack.translate(r, x, y);
         }
+        
+        float f1 = 5.0f;	
+        float f2 = 0.15f;	
+        float f3 = 1.0f;	
+        float f4 = 0.5f;	
 
         // render each item in the stack on the ground (higher stack count == more items displayed)
         for(int u = 0; u < renderCount; ++u) {
             matrixStack.push();
-
             // random positioning for rendered items, is especially seen in 64 block stacks on the ground
             if (u > 0) {
                 if (hasDepthInGui) {
@@ -109,13 +113,10 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
                     matrixStack.multiply(Vector3f.POSITIVE_Z.getRadialQuaternion(this.random.nextFloat()));
                 }
             }
-
             // render item
             this.itemRenderer.renderItem(itemStack, ModelTransformation.Mode.GROUND, false, matrixStack, vertexConsumerProvider, i, OverlayTexture.DEFAULT_UV, bakedModel);
-
             // end
             matrixStack.pop();
-
             // translate based on scale, which gies vertical layering to high stack count items
             if (!hasDepthInGui) {
                 matrixStack.translate(0.0F * scaleX, 0.0F * scaleY, 0.0625F * scaleZ);
